@@ -7,6 +7,8 @@ Installation
 Create a directory for the workspace.
 Go to the workspace directory and type in terminal :
 
+    mkdir ./src
+    
     echo "# IT IS UNLIKELY YOU WANT TO EDIT THIS FILE BY HAND,
     # UNLESS FOR REMOVING ENTRIES.
     # IF YOU WANT TO CHANGE THE ROS ENVIRONMENT VARIABLES 
@@ -24,7 +26,7 @@ Go to the workspace directory and type in terminal :
     - git: {local-name: media_onkyo_ip_driver, uri: 'ssh://git@git.tactfactory.com:2222/projetx/media-onkyo-ip-driver.git'}
     - git: {local-name: media_samsung_ip_driver, uri: 'ssh://git@git.tactfactory.com:2222/projetx/media-samsung-ip-driver.git'}
     - git: {local-name: media_xbmc_ip_driver, uri: 'ssh://git@git.tactfactory.com:2222/projetx/media-xbmc-ip-driver.git'}
-    - git: {local-name: people_common, uri: 'ssh://git@git.tactfactory.com:2222/projetx/people-common.git'}" > .rosinstall
+    - git: {local-name: people_common, uri: 'ssh://git@git.tactfactory.com:2222/projetx/people-common.git'}" > ./src/.rosinstall
 
 To install all sources of Alfred, type in terminal :
 
