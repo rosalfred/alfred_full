@@ -5,7 +5,7 @@ project(alfred_full)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  alfred
+  alfred_std
   media_camera_ip_driver
   media_onkyo_ip_driver
   media_samsung_ip_driver
