@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>alfred_full</name>
-  <version>0.1.46</version>
+  <version>0.1.47</version>
   <description>This metapackage depends on package for full alfred stack. This package is full Alfred Assistant stack.</description>
   <maintainer email="mick.gaillard@gmail.com">Mickaël Gaillard</maintainer>
   <license>GPLv3</license>
