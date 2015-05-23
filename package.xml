@@ -20,14 +20,9 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>alfred</build_depend>
-  <build_depend>media_camera_ip_driver</build_depend>
-  <build_depend>media_onkyo_ip_driver</build_depend>
-  <build_depend>media_samsung_ip_driver</build_depend>
-  <build_depend>media_xbmc_ip_driver</build_depend>
   <run_depend>alfred</run_depend>
   <run_depend>media_camera_ip_driver</run_depend>
-  <run_depend>media_onkyo_ip_driver</run_depend>
+  <!--run_depend>media_onkyo_ip_driver</run_depend-->
   <run_depend>media_samsung_ip_driver</run_depend>
   <run_depend>media_xbmc_ip_driver</run_depend>
   <run_depend>alfred_skype</run_depend>
