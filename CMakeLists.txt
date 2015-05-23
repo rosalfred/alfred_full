@@ -5,11 +5,11 @@ project(alfred_full)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  alfred
-  media_camera_ip_driver
-  media_onkyo_ip_driver
-  media_samsung_ip_driver
-  media_xbmc_ip_driver
+#  alfred
+#  media_camera_ip_driver
+#  media_onkyo_ip_driver
+#  media_samsung_ip_driver
+#  media_xbmc_ip_driver
 )
 
 ## System dependencies are found with CMake's conventions
