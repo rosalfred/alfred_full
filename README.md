@@ -16,6 +16,7 @@ Go to the workspace directory and type in terminal :
     # IF YOU CHANGE IT, USE rosinstall FOR THE CHANGES TO TAKE EFFECT
     - git: {local-name: alfred, uri: 'ssh://git@git.tactfactory.com:2222/projetx/alfred.git'}
     - git: {local-name: alfred_full, uri: 'ssh://git@git.tactfactory.com:2222/projetx/alfred-full.git'}
+    - git: {local-name: rosjava_dynamic_reconfigure, uri: 'https://github.com/Theosakamg/rosjava_dynamic_reconfigure.git'}
     - git: {local-name: network_wakeonlan, uri: 'ssh://git@git.tactfactory.com:2222/projetx/network-wakeonlan.git'}
     - git: {local-name: network_zeroconf, uri: 'ssh://git@git.tactfactory.com:2222/projetx/network-zeroconf.git'}
     - git: {local-name: media_camera_ip_driver, uri: 'ssh://git@git.tactfactory.com:2222/projetx/media-camera-ip-driver.git'}
