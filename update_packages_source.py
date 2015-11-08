@@ -4,11 +4,11 @@ import os
 import subprocess
 import sys
 
-os.chdir("./src"
+os.chdir("./src")
 subprocess.call(['wstool'])
 
 os.chdir("..")
-subprocess.call(['genjava_message_artifacts', '-p', 'media_msgs', 'heater_msgs'])
+subprocess.call(['genjava_message_artifacts', '-p', 'rosbuilding_msgs', 'media_msgs', 'heater_msgs'])
 subprocess.call(['catkin_make'])
 
 os.chdir("./src")
