@@ -4,36 +4,41 @@ import os
 import subprocess
 import sys
 
-class UpdateUtils:
-    def __init__(self):
-        self.data = []
+class UpdateUtils(object):
+    setup_sh = 'devel/setup.sh'
+    env_ros_package_path = 'ROS_PACKAGE_PATH'
+    ros_install_prefix = '.rosinstall'
+    alfred_full_path = 'src/alfred_full'
+    msg_packages = ['rosbuilding_msgs', 'media_msgs', 'heater_msgs']
 
     def init(self):
-        # Check if current directory is alfred_full, in this case => init
-        if self.is_in_alfred_full():
-            self.prepare()
-        # in this case we are in workspace
-        elif self.is_in_workspace():
-            self.update_workspace()
+        is_in_workspace = self.is_in_workspace() # in this case we are in workspace
+        is_in_alfred_full = self.is_in_alfred_full() # if current directory is alfred_full
+        
+        if is_in_workspace:
+            os.chdir(UpdateUtils.alfred_full_path)
+            
         # in this case => error
-        else:
+        if not is_in_workspace and not is_in_alfred_full:
             self.log(LogLevel.ERROR, 'You are not in a ROS workspace. Exit.')
             sys.exit()
+            
+        self.prepare()
 
     def prepare(self):
         self.log(LogLevel.INFO, 'Prepare alfred sources packages...')
-        self.create_symlink('.rosinstall', '../')
+        self.create_symlink(UpdateUtils.ros_install_prefix, '../')
         self.create_symlink(os.path.basename(__file__), '../../')
-            
+        
         os.chdir('../..')
         self.update_workspace()
 
     def update_workspace(self):
         self.log(LogLevel.INFO, 'Update workspace...')
         
-        if os.path.isfile('devel/setup.sh'):
-            self.shell_source('devel/setup.sh')
-        elif os.environ.get('ROS_PACKAGE_PATH') == None:
+        if os.path.isfile(UpdateUtils.setup_sh):
+            self.shell_source(UpdateUtils.setup_sh)
+        elif os.environ.get(UpdateUtils.env_ros_package_path) == None:
             self.log(LogLevel.ERROR, 'You must source java catkin setup.sh environment script')
             sys.exit()
         
@@ -45,16 +50,17 @@ class UpdateUtils:
     def wstool(self):
         self.log(LogLevel.INFO, 'Execute wstool')
         
-        files = os.listdir('src/alfred_full/')
+        files = os.listdir(UpdateUtils.alfred_full_path)
         for fn in files:
-            if fn.endswith('.rosinstall') and fn != '.rosinstall':
-                subprocess.call(['wstool', 'merge', '-t', 'src', './src/alfred_full/' + fn])
+            if fn.endswith(UpdateUtils.ros_install_prefix) and fn != UpdateUtils.ros_install_prefix:
+                subprocess.call(['wstool', 'merge', '-t', 'src', UpdateUtils.alfred_full_path + '/' + fn])
                 
         subprocess.call(['wstool', 'update', '-t', 'src'])
 
     def genjava(self):
         self.log(LogLevel.INFO, 'Execute genjava_message_artifacts')
-        subprocess.call(['genjava_message_artifacts', '-p', 'rosbuilding_msgs', 'media_msgs', 'heater_msgs'])
+        args = ['genjava_message_artifacts', '-p'] + UpdateUtils.msg_packages;
+        subprocess.call(args)
 
     def catkin_make(self):
         self.log(LogLevel.INFO, 'Execute catkin_make')
@@ -76,7 +82,7 @@ class UpdateUtils:
                 subprocess.call(['./gradlew', 'cleanEclipse', 'eclipse'])
 
     def is_in_alfred_full(self):
-        result = os.getcwd().endswith('src/alfred_full')
+        result = os.getcwd().endswith(UpdateUtils.alfred_full_path)
         return result
 
     def is_in_workspace(self):
