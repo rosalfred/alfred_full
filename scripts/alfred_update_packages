@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+"""
+Update Alfred ROS packages, from the command line.
+"""
+import os
+import sys
+
+import alfred
+
+if __name__ == "__main__":
+    alfred.standalone_main(sys.argv)
+

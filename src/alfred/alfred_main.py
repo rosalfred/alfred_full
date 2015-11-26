@@ -1,9 +1,64 @@
-#!/usr/bin/env python
+# Software License Agreement
+#
+# Copyright (c) 2015, Mickael Gaillard.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  * Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#  * Redistributions in binary form must reproduce the above
+#    copyright notice, this list of conditions and the following
+#    disclaimer in the documentation and/or other materials provided
+#    with the distribution.
+#  * Neither the name of Willow Garage, Inc. nor the names of its
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
 
+##############################################################################
+# Imports
+##############################################################################
+
+from __future__ import print_function
+import argparse
 import os
 import subprocess
-import sys
 
+import catkin_pkg.packages
+import genjava
+import wstool.wstool_cli
+
+def standalone_parse_arguments(argv):
+    parser = argparse.ArgumentParser(description='Update Alfred ROS packages from repository, build catkin and update eclipse project.')
+    parser.add_argument('-p', '--package', action='store', nargs='*', default=[], help='a list of packages to update')
+    parser.add_argument('-w', '--wstool', default=False, action='store_true', help='run wstool update (false)')
+    parser.add_argument('-g', '--genmsgs', default=False, action='store_true', help='run generate_message_artifacts (false)')
+    parser.add_argument('-c', '--catkin', default=False, action='store_true', help='run catkin_make (false)')
+    parser.add_argument('-e', '--eclipse', default=False, action='store_true', help='update Eclipse project (false)')
+    parser.add_argument('-v', '--verbose', default=False, action='store_true', help='enable verbosity in debugging (false)')
+    parser.add_argument('-f', '--fakeit', default=False, action='store_true', help='dont build, just list the packages it would update (false)')
+    parsed_arguments = parser.parse_args(argv)
+    return parsed_arguments
+
+def standalone_main(argv):
+    args = standalone_parse_arguments(argv[1:])
+    UpdateUtils().init()
+        
 class UpdateUtils(object):
     setup_sh = 'devel/setup.sh'
     env_ros_package_path = 'ROS_PACKAGE_PATH'
@@ -28,7 +83,7 @@ class UpdateUtils(object):
     def prepare(self):
         self.log(LogLevel.INFO, 'Prepare alfred sources packages...')
         self.create_symlink(UpdateUtils.ros_install_prefix, '../')
-        self.create_symlink(os.path.basename(__file__), '../../')
+        #self.create_symlink(os.path.basename(__file__), '../../')
         
         os.chdir('../..')
         self.update_workspace()
@@ -53,14 +108,14 @@ class UpdateUtils(object):
         files = os.listdir(UpdateUtils.alfred_full_path)
         for fn in files:
             if fn.endswith(UpdateUtils.ros_install_prefix) and fn != UpdateUtils.ros_install_prefix:
-                subprocess.call(['wstool', 'merge', '-t', 'src', UpdateUtils.alfred_full_path + '/' + fn])
-                
-        subprocess.call(['wstool', 'update', '-t', 'src'])
+                wstool.wstool_cli.wstool_main(['wstool', 'merge', '-t', 'src', UpdateUtils.alfred_full_path + '/' + fn])
+        
+        wstool.wstool_cli.wstool_main(['wstool', 'update', '-t', 'src'])
 
     def genjava(self):
         self.log(LogLevel.INFO, 'Execute genjava_message_artifacts')
         args = ['genjava_message_artifacts', '-p'] + UpdateUtils.msg_packages;
-        subprocess.call(args)
+        genjava.standalone_main(args)
 
     def catkin_make(self):
         self.log(LogLevel.INFO, 'Execute catkin_make')
@@ -118,6 +173,3 @@ class LogLevel:
     INFO = '\x1b[1;32m'
     WARNING = '\x1b[1;33m'
     ERROR = '\x1b[1;31m'
-
-if __name__ == '__main__':
-    UpdateUtils().init()
