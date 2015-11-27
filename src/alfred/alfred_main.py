@@ -43,64 +43,59 @@ import catkin_pkg.packages
 import genjava
 import wstool.wstool_cli
 
+import rosjava_build_tools
+
 def standalone_parse_arguments(argv):
     parser = argparse.ArgumentParser(description='Update Alfred ROS packages from repository, build catkin and update eclipse project.')
-    parser.add_argument('-p', '--package', action='store', nargs='*', default=[], help='a list of packages to update')
-    parser.add_argument('-w', '--wstool', default=False, action='store_true', help='run wstool update (false)')
-    parser.add_argument('-g', '--genmsgs', default=False, action='store_true', help='run generate_message_artifacts (false)')
-    parser.add_argument('-c', '--catkin', default=False, action='store_true', help='run catkin_make (false)')
-    parser.add_argument('-e', '--eclipse', default=False, action='store_true', help='update Eclipse project (false)')
-    parser.add_argument('-v', '--verbose', default=False, action='store_true', help='enable verbosity in debugging (false)')
-    parser.add_argument('-f', '--fakeit', default=False, action='store_true', help='dont build, just list the packages it would update (false)')
+    #parser.add_argument('-p', '--package', action='store', nargs='*', default=[], help='a list of packages to update [WIP]')
+    parser.add_argument('-w', '--wstool', default=False, action='store_true', help='run wstool update [WIP]')
+    parser.add_argument('-g', '--genmsgs', default=False, action='store_true', help='run generate_message_artifacts')
+    parser.add_argument('-c', '--catkin', default=False, action='store_true', help='run catkin_make')
+    parser.add_argument('-e', '--eclipse', default=False, action='store_true', help='update Eclipse project')
+    #parser.add_argument('-v', '--verbose', default=False, action='store_true', help='enable verbosity in debugging')
+    #parser.add_argument('-l', '--list', default=False, action='store_true', help='list the packages it would update')
     parsed_arguments = parser.parse_args(argv)
     return parsed_arguments
 
 def standalone_main(argv):
-    args = standalone_parse_arguments(argv[1:])
-    UpdateUtils().init()
+    options = standalone_parse_arguments(argv[1:])
+    UpdateUtils(options).init()
         
 class UpdateUtils(object):
-    setup_sh = 'devel/setup.sh'
-    env_ros_package_path = 'ROS_PACKAGE_PATH'
     ros_install_prefix = '.rosinstall'
     alfred_full_path = 'src/alfred_full'
-    msg_packages = ['rosbuilding_msgs', 'media_msgs', 'heater_msgs']
 
+    def __init__(self, options):
+        self.options = options
+    
     def init(self):
         is_in_workspace = self.is_in_workspace() # in this case we are in workspace
         is_in_alfred_full = self.is_in_alfred_full() # if current directory is alfred_full
-        
-        if is_in_workspace:
-            os.chdir(UpdateUtils.alfred_full_path)
-            
-        # in this case => error
-        if not is_in_workspace and not is_in_alfred_full:
-            self.log(LogLevel.ERROR, 'You are not in a ROS workspace. Exit.')
-            sys.exit()
             
         self.prepare()
+        self.update_workspace()
 
     def prepare(self):
         self.log(LogLevel.INFO, 'Prepare alfred sources packages...')
-        self.create_symlink(UpdateUtils.ros_install_prefix, '../')
-        #self.create_symlink(os.path.basename(__file__), '../../')
-        
-        os.chdir('../..')
-        self.update_workspace()
+        self.create_symlink(os.getcwd() + '/' + UpdateUtils.alfred_full_path + "/", os.getcwd() + '/src/', UpdateUtils.ros_install_prefix)
 
     def update_workspace(self):
         self.log(LogLevel.INFO, 'Update workspace...')
         
-        if os.path.isfile(UpdateUtils.setup_sh):
-            self.shell_source(UpdateUtils.setup_sh)
-        elif os.environ.get(UpdateUtils.env_ros_package_path) == None:
-            self.log(LogLevel.ERROR, 'You must source java catkin setup.sh environment script')
-            sys.exit()
+        '''If all options are false do all jobs'''
+        do_all = not (self.options.wstool or self.options.genmsgs or self.options.catkin or self.options.eclipse)
         
-        self.wstool()
-        self.genjava()
-        self.catkin_make()
-        self.update_eclipse()
+        if do_all or self.options.wstool:
+            self.wstool()
+            
+        if do_all or self.options.genmsgs:
+            self.genjava()
+        
+        if do_all or self.options.catkin:
+            self.catkin_make()
+        
+        if do_all or self.options.eclipse:
+            self.update_eclipse()
 
     def wstool(self):
         self.log(LogLevel.INFO, 'Execute wstool')
@@ -114,7 +109,17 @@ class UpdateUtils(object):
 
     def genjava(self):
         self.log(LogLevel.INFO, 'Execute genjava_message_artifacts')
-        args = ['genjava_message_artifacts', '-p'] + UpdateUtils.msg_packages;
+        
+        msg_packages = []
+        current_path = os.getcwd()
+        
+        sorted_package_tuples = rosjava_build_tools.catkin.index_message_package_dependencies_from_local_environment(package_name_list=[])
+        
+        for unused_relative_path, package in sorted_package_tuples:
+            if package.filename.startswith(current_path):
+                msg_packages += [unused_relative_path]
+                
+        args = ['genjava_message_artifacts', '-p'] + msg_packages;
         genjava.standalone_main(args)
 
     def catkin_make(self):
@@ -149,21 +154,15 @@ class UpdateUtils(object):
                 break
         return result
     
-    def create_symlink(self, filename, destination):
-        if os.path.isfile(destination + filename):
+    def create_symlink(self, source_dir, destination_dir, filename):
+        print(source_dir)
+        print(destination_dir)
+        print(filename)
+        if os.path.isfile(destination_dir + filename):
             self.log(LogLevel.WARNING, 'File %s already exists, skip' % (filename))
         else:
-            os.symlink(os.getcwd() + '/' + filename, destination + filename)
+            os.symlink(source_dir + filename, destination_dir + filename)
             self.log(LogLevel.INFO, 'Symlink for %s created' % (filename))
-
-    def shell_source(self, script):
-        """Sometime you want to emulate the action of "source" in bash,
-        settings some environment variables. Here is a way to do it."""
-        import subprocess, os
-        pipe = subprocess.Popen(". %s; env" % script, stdout=subprocess.PIPE, shell=True)
-        output = pipe.communicate()[0]
-        env = dict((line.split("=", 1) for line in output.splitlines()))
-        os.environ.update(env)
     
     def log(self, level, message):
         print('%s%s\x1b[0m' % (level, message))
