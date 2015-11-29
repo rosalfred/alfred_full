@@ -183,6 +183,8 @@ class UpdateUtils(object):
         if packages:
             args = args + ['--pkg'] + packages
         
+        os.putenv('JAVA_TOOL_OPTIONS', '-Dfile.encoding=UTF8')
+        
         if subprocess.call(args) != 0:
             Util.log(LogLevel.ERROR, 'catkin_make failed, update aborted')
             sys.exit()
