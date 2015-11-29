@@ -38,22 +38,22 @@ from __future__ import print_function
 import argparse
 import os
 import subprocess
+import sys
 
 import catkin_pkg.packages
 import genjava
 import wstool.wstool_cli
-
 import rosjava_build_tools
 
 def standalone_parse_arguments(argv):
     parser = argparse.ArgumentParser(description='Update Alfred ROS packages from repository, build catkin and update eclipse project.')
-    #parser.add_argument('-p', '--package', action='store', nargs='*', default=[], help='a list of packages to update [WIP]')
-    parser.add_argument('-w', '--wstool', default=False, action='store_true', help='run wstool update [WIP]')
+    parser.add_argument('-p', '--package', action='store', nargs='*', default=[], help='a list of packages to update')
+    parser.add_argument('-w', '--wstool', default=False, action='store_true', help='run wstool update')
     parser.add_argument('-g', '--genmsgs', default=False, action='store_true', help='run generate_message_artifacts')
     parser.add_argument('-c', '--catkin', default=False, action='store_true', help='run catkin_make')
     parser.add_argument('-e', '--eclipse', default=False, action='store_true', help='update Eclipse project')
     #parser.add_argument('-v', '--verbose', default=False, action='store_true', help='enable verbosity in debugging')
-    #parser.add_argument('-l', '--list', default=False, action='store_true', help='list the packages it would update')
+    parser.add_argument('-l', '--list', default=False, action='store_true', help='list the packages it would update')
     parsed_arguments = parser.parse_args(argv)
     return parsed_arguments
 
@@ -67,11 +67,22 @@ class UpdateUtils(object):
 
     def __init__(self, options):
         self.options = options
+        self.depends = None
     
     def init(self):
+        if self.options.package:
+            self.depends = []
+        
+        if self.options.list or self.options.package:
+            self.load_packages()
+        
+        if self.options.list:
+            self.list_packages()
+            sys.exit()
+        
         is_in_workspace = self.is_in_workspace() # in this case we are in workspace
         is_in_alfred_full = self.is_in_alfred_full() # if current directory is alfred_full
-            
+        
         self.prepare()
         self.update_workspace()
 
@@ -124,9 +135,20 @@ class UpdateUtils(object):
 
     def catkin_make(self):
         self.log(LogLevel.INFO, 'Execute catkin_make')
-        if subprocess.call(['catkin_make', '--directory', os.getcwd()]) != 0:
-            self.log(LogLevel.ERROR, 'catkin_make failed, update aborted')
-            sys.exit()
+        
+        if not self.depends:
+            if subprocess.call(['catkin_make', '--directory', os.getcwd()]) != 0:
+                self.log(LogLevel.ERROR, 'catkin_make failed, update aborted')
+                sys.exit()
+        else:
+            packages = []
+            
+            for package in self.depends:
+                packages += [package.name]
+                
+            if subprocess.call(['catkin_make', '--directory', os.getcwd(), '--pkg'] + packages) != 0:
+                self.log(LogLevel.ERROR, 'catkin_make failed, update aborted')
+                sys.exit()
 
     def update_eclipse(self):
         self.log(LogLevel.INFO, 'Update eclipse projects files...')
@@ -155,14 +177,59 @@ class UpdateUtils(object):
         return result
     
     def create_symlink(self, source_dir, destination_dir, filename):
-        print(source_dir)
-        print(destination_dir)
-        print(filename)
         if os.path.isfile(destination_dir + filename):
             self.log(LogLevel.WARNING, 'File %s already exists, skip' % (filename))
         else:
             os.symlink(source_dir + filename, destination_dir + filename)
             self.log(LogLevel.INFO, 'Symlink for %s created' % (filename))
+    
+    def load_packages(self):
+        self.packages = catkin_pkg.packages.find_packages('./src')
+        
+        if self.options.package:
+            for package in self.options.package:
+                if package in self.packages:
+                    self.depends += [self.packages[package]]
+            
+            for package in self.options.package:
+                self.load_depends(package)
+        
+    def load_depends(self, package):
+        if package in self.packages:
+            package = self.packages[package]
+            
+            if not package in self.depends:
+                self.depends = [package] + self.depends
+            
+            for p in package['build_depends']:
+                self.load_depends(p.name)
+        
+    def list_packages(self):
+        for package in self.packages:
+            self.list_package(package)
+    
+    def list_package(self, package, level = 0):
+        hasPackage = package in self.packages
+        hasDependencies = False
+        deps = {}
+        
+        if hasPackage:
+            package = self.packages[package].name
+            deps = self.packages[package]['build_depends']
+            hasDependencies = bool(deps)
+        
+        prefix = '+---'
+        if hasPackage and hasDependencies:
+            prefix = '\---'
+        
+        for num in range(0, level):
+            prefix = '     ' + prefix
+        
+        print('{0} {1}'.format(prefix, package))
+        
+        if hasDependencies:
+            for p in deps:
+                self.list_package(p.name, level + 1)
     
     def log(self, level, message):
         print('%s%s\x1b[0m' % (level, message))
