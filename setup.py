@@ -6,7 +6,7 @@ from catkin_pkg.python_setup import generate_distutils_setup
 d = generate_distutils_setup(
     packages=['alfred'],
     package_dir={'': 'src'},
-    scripts=['scripts/alfred_update_packages'],
+    scripts=['scripts/alfred_tools'],
 )
 
 setup(**d)

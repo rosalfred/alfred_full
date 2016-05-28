@@ -3,22 +3,14 @@
   <name>alfred_full</name>
   <version>0.1.84</version>
   <description>This metapackage depends on package for full alfred stack. This package is full Alfred Assistant stack.</description>
+  
   <maintainer email="mick.gaillard@gmail.com">Mickaël Gaillard</maintainer>
-  <license>GPLv3</license>
+  <maintainer email="erwan.lehuitouze@gmail.com">Erwan Le Huitouze</maintainer>
   <author email="mick.gaillard@gmail.com">Mickaël Gaillard</author>
+  <author email="erwan.lehuitouze@gmail.com">Erwan Le Huitouze</author>
+  
+  <license>GPLv3</license>
 
-
-  <!-- The *_depend tags are used to specify dependencies -->
-  <!-- Dependencies can be catkin packages or system dependencies -->
-  <!-- Examples: -->
-  <!-- Use build_depend for packages you need at compile time: -->
-  <!--   <build_depend>message_generation</build_depend> -->
-  <!-- Use buildtool_depend for build tool packages: -->
-  <!--   <buildtool_depend>catkin</buildtool_depend> -->
-  <!-- Use run_depend for packages you need at runtime: -->
-  <!--   <run_depend>message_runtime</run_depend> -->
-  <!-- Use test_depend for packages you need only for testing: -->
-  <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
   
   <build_depend>python-catkin-pkg</build_depend>
@@ -36,13 +28,4 @@
   <run_depend>network_wakeonlan</run_depend>
   <run_depend>alfred_tts_linux</run_depend>
 
-
-  <!-- The export tag contains other, unspecified, tags -->
-  <export>
-    <!-- You can specify that this package is a metapackage here: -->
-    <!-- <metapackage/> -->
-
-    <!-- Other tools can request additional information be placed here -->
-
-  </export>
 </package>

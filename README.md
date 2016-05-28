@@ -18,4 +18,4 @@ Installation & Update
 
 You can now use alfred script to install or update Alfred ROS packages
 
-    alfred_update_packages
+    alfred_tools
