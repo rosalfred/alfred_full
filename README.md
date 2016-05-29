@@ -8,7 +8,7 @@ Create a directory for the workspace.
 Go to the workspace directory and type in terminal :
 
     mkdir ./src
-    git clone ssh://git@git.tactfactory.com:2222/projetx/alfred-full.git ./src/alfred_full
+    git clone https://github.com/rosalfred/alfred_full.git ./src/alfred_full
     source {your rosjava setup.bash}
     catkin_make
     source devel/setup.bash
