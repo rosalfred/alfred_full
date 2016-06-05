@@ -4,9 +4,9 @@
   <version>0.1.84</version>
   <description>This metapackage depends on package for full alfred stack. This package is full Alfred Assistant stack.</description>
   
-  <maintainer email="mick.gaillard@gmail.com">Mickaël Gaillard</maintainer>
+  <maintainer email="mick.gaillard@gmail.com">Mickael Gaillard</maintainer>
   <maintainer email="erwan.lehuitouze@gmail.com">Erwan Le Huitouze</maintainer>
-  <author email="mick.gaillard@gmail.com">Mickaël Gaillard</author>
+  <author email="mick.gaillard@gmail.com">Mickael Gaillard</author>
   <author email="erwan.lehuitouze@gmail.com">Erwan Le Huitouze</author>
   
   <license>GPLv3</license>
@@ -19,13 +19,9 @@
   <run_depend>python-catkin-pkg</run_depend>
   <run_depend>python-rospkg</run_depend>
   <run_depend>alfred</run_depend>
-  <run_depend>media_camera_ip_driver</run_depend>
-  <!--run_depend>media_onkyo_ip_driver</run_depend-->
-  <run_depend>media_samsung_ip_driver</run_depend>
-  <run_depend>media_xbmc_ip_driver</run_depend>
-  <run_depend>alfred_skype</run_depend>
-  <run_depend>home_weather</run_depend>
-  <run_depend>network_wakeonlan</run_depend>
-  <run_depend>alfred_tts_linux</run_depend>
+  <!--run_depend>smarthome_media_onkyo_ip_driver</run_depend-->
+  <run_depend>smarthome_media_samsung_ip_driver</run_depend>
+  <run_depend>smarthome_media_xbmc_ip_driver</run_depend>
+  <run_depend>smarthome_network_wakeonlan</run_depend>
 
 </package>
