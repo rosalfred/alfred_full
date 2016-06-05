@@ -2,8 +2,8 @@
 Changelog for package alfred_full
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.85 (2016-06-05)
+-------------------
 * Update rosinstall paths
 * Update install instructions
 * Update alfred_full package for github repositories
